@@ -39,48 +39,26 @@
   .extra-box { background: var(--card2); border-radius: 10px; padding: 12px; margin-bottom: 12px; display: none; }
   .extra-box.show { display: block; }
   .btn { width: 100%; padding: 16px; border-radius: var(--radius); border: none; font-family: 'Sarabun', sans-serif; font-size: 1.05rem; font-weight: 800; cursor: pointer; transition: all 0.15s; margin-bottom: 10px; }
-  .btn-primary { background: var(--accent); color: #0f1923; }
-  .btn-primary:active { background: #d4891a; transform: scale(0.98); }
   .btn-save { background: var(--green); color: #0f1923; font-size: 1.1rem; }
   .btn-save:active { background: #27ae60; transform: scale(0.98); }
   .btn-save:disabled { background: #2e4060; color: var(--muted); cursor: not-allowed; transform: none; }
-  .btn-copy { background: var(--card2); color: var(--text); border: 1.5px solid var(--border); }
   .btn-reset { background: transparent; color: var(--muted); font-size: 0.85rem; font-weight: 600; border: 1.5px solid var(--border); }
-  .output-box { background: #0a1118; border: 1.5px solid var(--accent); border-radius: var(--radius); padding: 16px; font-size: 0.95rem; line-height: 1.9; white-space: pre-wrap; color: var(--text); margin-bottom: 14px; display: none; }
-  .output-box.show { display: block; }
   .status-box { border-radius: var(--radius); padding: 14px 16px; margin-bottom: 14px; font-weight: 700; font-size: 0.95rem; text-align: center; display: none; }
   .status-box.success { background: #0d2e1a; border: 1.5px solid var(--green); color: var(--green); display: block; }
   .status-box.error { background: #2e0d0d; border: 1.5px solid var(--red); color: var(--red); display: block; }
   .status-box.loading { background: var(--card2); border: 1.5px solid var(--accent); color: var(--accent); display: block; }
   .toast { text-align: center; color: var(--green); font-weight: 700; font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; margin-bottom: 8px; min-height: 22px; }
   .toast.show { opacity: 1; }
-
-  /* SETUP BANNER */
-  .setup-banner { background: #1a1a0d; border: 2px dashed var(--accent); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px; }
-  .setup-banner p { font-size: 0.82rem; color: var(--accent); font-weight: 600; margin-bottom: 6px; }
-  .setup-banner input { margin-bottom: 0; font-size: 0.85rem; background: #0f1200; border-color: #4a4a00; }
-  .setup-banner .hint { color: #7a7a30; margin-top: 4px; margin-bottom: 0; }
-
   input::placeholder, textarea::placeholder { color: #3d5570; }
 </style>
 </head>
 <body>
-
 <header>
   <h1>🏢 บันทึกรายรับห้องเช่า</h1>
   <p id="dateDisplay"></p>
 </header>
-
 <div class="container">
 
-  <!-- SETUP: Web App URL -->
-  <div class="setup-banner">
-    <p>⚙️ ตั้งค่าครั้งแรก: วาง Web App URL จาก Google Apps Script</p>
-    <input type="url" id="webAppUrl" placeholder="https://script.google.com/macros/s/..." oninput="saveUrl()">
-    <div class="hint">ดูคู่มือในไฟล์ PDF เพื่อรับ URL นี้</div>
-  </div>
-
-  <!-- ข้อมูลห้อง -->
   <div class="section">
     <div class="section-title">📋 ข้อมูลห้องและวันที่</div>
     <div class="row2">
@@ -102,7 +80,6 @@
     </select>
   </div>
 
-  <!-- ประเภทรายการ -->
   <div class="section">
     <div class="section-title">🏷️ ประเภทรายการ</div>
     <div class="type-btns">
@@ -119,7 +96,6 @@
     <div id="amountFields"></div>
   </div>
 
-  <!-- โอนเงิน -->
   <div class="section">
     <div class="section-title">💸 การโอนเงินออก</div>
     <div class="toggle-row">
@@ -134,7 +110,6 @@
     </div>
   </div>
 
-  <!-- หมายเหตุ -->
   <div class="section">
     <div class="section-title">📝 หมายเหตุและเงินค้าง</div>
     <label>หมายเหตุ</label>
@@ -151,39 +126,23 @@
     </div>
   </div>
 
-  <!-- ปุ่มบันทึก -->
   <button class="btn btn-save" id="saveBtn" onclick="saveToSheet()">☁️ บันทึกลง Google Sheet</button>
-  <button class="btn btn-primary" onclick="generate()">👁️ ดูตัวอย่างข้อความ</button>
-
-  <!-- Status -->
   <div class="status-box" id="statusBox"></div>
-
-  <!-- Output preview -->
-  <div class="output-box" id="output"></div>
-  <div class="toast" id="toast">✔ คัดลอกแล้ว!</div>
-  <button class="btn btn-copy" id="copyBtn" onclick="copyText()" style="display:none">📋 คัดลอกข้อความ</button>
+  <div class="toast" id="toast">✔ บันทึกสำเร็จ!</div>
   <button class="btn btn-reset" id="resetBtn" onclick="resetForm()" style="display:none">🔄 บันทึกรายการใหม่</button>
 
 </div>
 
 <script>
-  // Init date
+  // ======= ใส่ Web App URL ที่นี่ =======
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxuY8tMGjYFJH25IetXeTd9c0h8vM0WJPvM0Fc7P8NP3VBvv2pZF0I3mr1rwJTNVi8f/exec';
+  // =====================================
+
   const today = new Date();
   const pad = n => String(n).padStart(2,'0');
   document.getElementById('date').value = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
   const thaiM = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
   document.getElementById('dateDisplay').textContent = `${today.getDate()} ${thaiM[today.getMonth()+1]} ${today.getFullYear()+543}`;
-
-  // Load saved URL
-  const savedUrl = localStorage.getItem('rentalWebAppUrl') || 'https://script.google.com/macros/s/AKfycbxuY8tMGjYFJH25IetXeTd9c0h8vM0WJPvM0Fc7P8NP3VBvv2pZF0I3mr1rwJTNVi8f/exec';
-if (savedUrl) {
-  document.getElementById('webAppUrl').value = savedUrl;
-  document.querySelector('.setup-banner').style.display = 'none';
-}
-
-  function saveUrl() {
-    localStorage.setItem('rentalWebAppUrl', document.getElementById('webAppUrl').value.trim());
-  }
 
   let selectedTypes = [], transferOn = false, debtOn = false;
 
@@ -234,35 +193,18 @@ if (savedUrl) {
     const date = document.getElementById('date').value;
     const admin = document.getElementById('admin').value;
     const note = document.getElementById('note').value.trim();
-
-    let amounts = {};
-    let total = 0;
+    let amounts = {}, total = 0;
     selectedTypes.forEach(type => {
       const id = 'amt_' + type.replace(/\s/g,'_');
       const val = Number(document.getElementById(id)?.value || 0);
       amounts[type] = val;
       total += val;
     });
-
     const transferTo = transferOn ? document.getElementById('transferTo').value.trim() : '';
     const transferAmt = transferOn ? Number(document.getElementById('transferAmt').value || 0) : 0;
     const debtAmt = debtOn ? Number(document.getElementById('debtAmt').value || 0) : 0;
     const debtDate = debtOn ? document.getElementById('debtDate').value : '';
-
     return { room, date, admin, amounts, total, transferTo, transferAmt, debtAmt, debtDate, note };
-  }
-
-  function buildText(d) {
-    let lines = [`📅 ${thaiDate(d.date)}`, `🏠 ห้อง ${d.room}`];
-    selectedTypes.forEach(type => {
-      if (d.amounts[type] > 0) lines.push(`  • ${type}: ${fmt(d.amounts[type])} บาท`);
-    });
-    if (d.total > 0) lines.push(`💰 รวม: ${fmt(d.total)} บาท`);
-    if (d.transferTo || d.transferAmt) lines.push(`💸 โอนให้ ${d.transferTo||'—'}: ${d.transferAmt ? fmt(d.transferAmt)+' บาท' : '—'}`);
-    if (d.debtAmt) lines.push(`⚠️ ยอดค้าง: ${fmt(d.debtAmt)} บาท${d.debtDate ? ` (นัดจ่าย ${thaiDate(d.debtDate)})` : ''}`);
-    if (d.note) lines.push(`📝 ${d.note}`);
-    if (d.admin) lines.push(`👤 ${d.admin}`);
-    return lines.join('\n');
   }
 
   function validate() {
@@ -274,26 +216,8 @@ if (savedUrl) {
     return true;
   }
 
-  function generate() {
-    if (!validate()) return;
-    const d = collectData();
-    const text = buildText(d);
-    const out = document.getElementById('output');
-    out.textContent = text;
-    out.classList.add('show');
-    document.getElementById('copyBtn').style.display = 'block';
-    document.getElementById('resetBtn').style.display = 'block';
-    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
   async function saveToSheet() {
-    const url = document.getElementById('webAppUrl').value.trim();
-    if (!url || !url.startsWith('https://script.google.com')) {
-      showStatus('error', '❌ กรุณาวาง Web App URL ก่อน (ดูคู่มือ)');
-      return;
-    }
     if (!validate()) return;
-
     const d = collectData();
     const btn = document.getElementById('saveBtn');
     btn.disabled = true;
@@ -301,10 +225,8 @@ if (savedUrl) {
     showStatus('loading', '⏳ กำลังส่งข้อมูลไป Google Sheet...');
 
     const payload = {
-      date: thaiDate(d.date),
-      fullDate: d.date,
-      room: d.room,
-      admin: d.admin,
+      date: thaiDate(d.date), fullDate: d.date,
+      room: d.room, admin: d.admin,
       rent: d.amounts['ค่าเช่า'] || 0,
       water: d.amounts['ค่าน้ำ'] || 0,
       electric: d.amounts['ค่าไฟ'] || 0,
@@ -314,15 +236,14 @@ if (savedUrl) {
       net: d.amounts['เน็ต'] || 0,
       other: d.amounts['อื่นๆ'] || 0,
       total: d.total,
-      transferTo: d.transferTo,
-      transferAmt: d.transferAmt,
+      transferTo: d.transferTo, transferAmt: d.transferAmt,
       debtAmt: d.debtAmt,
       debtDate: d.debtDate ? thaiDate(d.debtDate) : '',
       note: d.note
     };
 
     try {
-      const res = await fetch(url, {
+      const res = await fetch(WEB_APP_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(payload)
@@ -335,7 +256,7 @@ if (savedUrl) {
         showStatus('error', '❌ บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง');
       }
     } catch (e) {
-      showStatus('error', '❌ เชื่อมต่อไม่ได้ ตรวจสอบ URL หรืออินเทอร์เน็ต');
+      showStatus('error', '❌ เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ต');
     }
 
     btn.disabled = false;
@@ -349,23 +270,6 @@ if (savedUrl) {
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
-  function copyText() {
-    const text = document.getElementById('output').textContent;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(showToast);
-    } else {
-      const ta = document.createElement('textarea');
-      ta.value = text; document.body.appendChild(ta); ta.select();
-      document.execCommand('copy'); document.body.removeChild(ta); showToast();
-    }
-  }
-
-  function showToast() {
-    const t = document.getElementById('toast');
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2000);
-  }
-
   function resetForm() {
     ['room','note','transferTo','transferAmt','debtAmt','debtDate'].forEach(id => {
       const el = document.getElementById(id);
@@ -373,10 +277,8 @@ if (savedUrl) {
     });
     document.getElementById('admin').value = '';
     document.getElementById('amountFields').innerHTML = '';
-    document.getElementById('output').classList.remove('show');
-    document.getElementById('copyBtn').style.display = 'none';
-    document.getElementById('resetBtn').style.display = 'none';
     document.getElementById('statusBox').className = 'status-box';
+    document.getElementById('resetBtn').style.display = 'none';
     if (transferOn) toggleTransfer();
     if (debtOn) toggleDebt();
     selectedTypes = [];
