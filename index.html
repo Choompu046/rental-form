@@ -176,7 +176,10 @@
 
   // Load saved URL
   const savedUrl = localStorage.getItem('rentalWebAppUrl') || 'https://script.google.com/macros/s/AKfycbxuY8tMGjYFJH25IetXeTd9c0h8vM0WJPvM0Fc7P8NP3VBvv2pZF0I3mr1rwJTNVi8f/exec';
-  if (savedUrl) document.getElementById('webAppUrl').value = savedUrl;
+if (savedUrl) {
+  document.getElementById('webAppUrl').value = savedUrl;
+  document.querySelector('.setup-banner').style.display = 'none';
+}
 
   function saveUrl() {
     localStorage.setItem('rentalWebAppUrl', document.getElementById('webAppUrl').value.trim());
