@@ -175,7 +175,7 @@
   document.getElementById('dateDisplay').textContent = `${today.getDate()} ${thaiM[today.getMonth()+1]} ${today.getFullYear()+543}`;
 
   // Load saved URL
-  const savedUrl = localStorage.getItem('rentalWebAppUrl') || '';
+  const savedUrl = localStorage.getItem('rentalWebAppUrl') || 'https://script.google.com/macros/s/AKfycbxuY8tMGjYFJH25IetXeTd9c0h8vM0WJPvM0Fc7P8NP3VBvv2pZF0I3mr1rwJTNVi8f/exec';
   if (savedUrl) document.getElementById('webAppUrl').value = savedUrl;
 
   function saveUrl() {
